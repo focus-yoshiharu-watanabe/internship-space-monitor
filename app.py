@@ -6,6 +6,7 @@
 
 参加者が触ってよいのは、下の「設定」欄だけです。
 """
+import os
 import sys
 import time
 import traceback
@@ -24,7 +25,8 @@ from absence import judge_absence
 # 設定（ここは自由に変えてOK）
 # ============================================================
 
-# カメラ番号（0, 1, 2 ...）。動画で試すときは "videos/test.mp4" のように書く
+# 使うカメラ。Jetson では担当者が「自分のカメラ」を書いてあるので、変えないこと
+# 動画で試すときは "videos/test.mp4" のように書く（PC で動かすときはカメラ番号 0, 1, 2 ...）
 SOURCE = 0
 
 # 検知するもの（例：["person", "cup", "cell phone"]）。英語の名前で書く
@@ -54,8 +56,9 @@ LEVEL_COLORS = {
 
 MODEL = Path(__file__).resolve().parent / "models" / "yolox_tiny.onnx"
 FRAME_WIDTH = 640
-WINDOW = "Space Monitor (q: quit)"  # 日本語にすると Jetson（Qt）でウィンドウが開けない
-WINDOW_SIZE = (1280, 720)
+# 日本語にすると Jetson（Qt）でウィンドウが開けない。Jetson で2人の画面を見分けるためユーザー名を入れる
+WINDOW = f"Space Monitor {os.environ.get('USER', '')} (q: quit)"
+WINDOW_SIZE = (960, 540)  # 1920x1080 のモニタに2人分並ぶ大きさ
 ALERT_KEYS = {"rule", "level", "message"}
 
 FONT_CANDIDATES = [
@@ -77,14 +80,15 @@ def load_font(size):
 
 
 def open_source(source):
-    """カメラ番号か動画ファイルを開く。(cap, 動画ファイルかどうか) を返す"""
-    if isinstance(source, int):
+    """カメラ（番号か /dev/... ）か動画ファイルを開く。(cap, 動画ファイルかどうか) を返す"""
+    if isinstance(source, int) or str(source).startswith("/dev/"):
         if sys.platform == "win32":
             cap = cv2.VideoCapture(source, cv2.CAP_DSHOW)
         else:
-            cap = cv2.VideoCapture(source)
+            cap = cv2.VideoCapture(source, cv2.CAP_V4L2)
         if not cap.isOpened():
-            sys.exit(f"[エラー] カメラ {source} を開けません。find_camera.py で番号を確認してください")
+            sys.exit(f"[エラー] カメラ {source} を開けません。"
+                     "ほかのプログラムが使っていないか、ケーブルが抜けていないか確認してください")
         return cap, False
 
     if not Path(source).exists():
