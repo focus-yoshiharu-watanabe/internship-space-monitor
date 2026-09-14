@@ -54,7 +54,8 @@ LEVEL_COLORS = {
 
 MODEL = Path(__file__).resolve().parent / "models" / "yolox_tiny.onnx"
 FRAME_WIDTH = 640
-WINDOW = "Space Monitor (q で終了)"
+WINDOW = "Space Monitor (q: quit)"  # 日本語にすると Jetson（Qt）でウィンドウが開けない
+WINDOW_SIZE = (1280, 720)
 ALERT_KEYS = {"rule", "level", "message"}
 
 FONT_CANDIDATES = [
@@ -220,7 +221,8 @@ def main():
     def on_mouse(event, x, y, flags, param):
         mouse[:] = [x, y]
 
-    cv2.namedWindow(WINDOW, cv2.WINDOW_NORMAL)
+    cv2.namedWindow(WINDOW, cv2.WINDOW_NORMAL | cv2.WINDOW_GUI_NORMAL)
+    cv2.resizeWindow(WINDOW, *WINDOW_SIZE)
     cv2.setMouseCallback(WINDOW, on_mouse)
 
     loop_offset = 0.0   # 動画を巻き戻したとき、時刻が戻らないようにする

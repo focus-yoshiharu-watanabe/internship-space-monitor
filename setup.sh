@@ -10,6 +10,11 @@ echo "=== 2/3 ライブラリを入れます（数分かかります） ==="
 .venv/bin/python -m pip install --upgrade pip
 .venv/bin/python -m pip install -r requirements.txt
 
+# pip 版 OpenCV の Qt がフォントを探して警告を出し続けるので、システムのフォントを見せる
+for qt in .venv/lib/python3*/site-packages/cv2/qt; do
+  [ -d "$qt" ] && [ ! -e "$qt/fonts" ] && ln -s /usr/share/fonts/truetype/dejavu "$qt/fonts" || true
+done
+
 echo "=== 3/3 AIモデルを確認します ==="
 .venv/bin/python -c "from detector import Detector; print('model OK:', Detector('models/yolox_tiny.onnx').device)"
 
