@@ -14,7 +14,10 @@
 2. VS Code の左下の **`><`** を押す → **Connect to Host...** → 担当者から聞いたアドレスを入力（例：`intern1@192.168.0.114`）
 3. 「Linux」を選び、パスワードを入力（担当者から聞いたもの）
 4. **Open Folder** → `space-monitor` を選んで OK
-5. 拡張機能 **Claude Code** を入れる（「SSH: … にインストール」を選ぶ）→ 自分のアカウントでログイン
+5. 拡張機能 **Claude Code**（発行元 Anthropic）を入れる（「**SSH: … にインストール**」を選ぶ）
+6. **`Ctrl + Shift + P`** → `Claude Code: Open` と入力 → 出てきたコマンド（例：Claude Code: Open in New Tab）を選ぶ
+   （アイコンが見つからなくても、この方法なら必ず開けます）
+7. **Sign in** → 自分のアカウントでログイン（ブラウザにコードが出たら、それを VS Code に貼る）
 
 ## 2. 起動
 
