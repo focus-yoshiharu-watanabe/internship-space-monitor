@@ -3,8 +3,13 @@
 
 YOLOX（Apache-2.0）の ONNX モデルを ONNX Runtime で動かす。
 PyTorch を使わないので、Windows のスマートアプリコントロールが有効な PC でも動く。
-Jetson などで onnxruntime-gpu が入っていれば、自動で GPU を使う。
+Jetson で onnxruntime-gpu が入っていれば TensorRT → CUDA → CPU の順に使えるものを使う。
+TensorRT は初回だけ最適化に約10分かかり、結果は TRT_CACHE に保存される（2回目以降は数秒）。
+環境変数 SPACE_MONITOR_NO_TRT=1 で TensorRT を使わない（CUDA になる）。
 """
+import os
+from pathlib import Path
+
 import cv2
 import numpy as np
 import onnxruntime as ort
@@ -22,16 +27,36 @@ COCO_CLASSES = (
     "teddy bear", "hair drier", "toothbrush",
 )
 
-PREFERRED_PROVIDERS = ("CUDAExecutionProvider", "CPUExecutionProvider")
 NMS_IOU = 0.45
+TRT_CACHE = Path.home() / ".cache" / "space-monitor-trt"
+DEVICE_NAMES = {
+    "TensorrtExecutionProvider": "GPU (TensorRT)",
+    "CUDAExecutionProvider": "GPU (CUDA)",
+}
+
+
+def _providers():
+    available = ort.get_available_providers()
+    providers = []
+    if "TensorrtExecutionProvider" in available and not os.environ.get("SPACE_MONITOR_NO_TRT"):
+        TRT_CACHE.mkdir(parents=True, exist_ok=True)
+        if not any(TRT_CACHE.glob("*.engine")):
+            print("[初回のみ] TensorRT の最適化をしています。10分ほど待ってください...")
+        providers.append(("TensorrtExecutionProvider", {
+            "trt_fp16_enable": True,
+            "trt_engine_cache_enable": True,
+            "trt_engine_cache_path": str(TRT_CACHE),
+        }))
+    for name in ("CUDAExecutionProvider", "CPUExecutionProvider"):
+        if name in available:
+            providers.append(name)
+    return providers
 
 
 class Detector:
     def __init__(self, model_path):
-        available = ort.get_available_providers()
-        providers = [p for p in PREFERRED_PROVIDERS if p in available]
-        self.session = ort.InferenceSession(str(model_path), providers=providers)
-        self.device = "GPU" if "CUDAExecutionProvider" in self.session.get_providers() else "CPU"
+        self.session = ort.InferenceSession(str(model_path), providers=_providers())
+        self.device = DEVICE_NAMES.get(self.session.get_providers()[0], "CPU")
 
         model_input = self.session.get_inputs()[0]
         self.input_name = model_input.name
