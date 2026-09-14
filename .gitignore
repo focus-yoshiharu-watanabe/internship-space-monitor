@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+# テスト動画には人が映るので公開リポジトリに入れない
+videos/*
+!videos/.gitkeep
