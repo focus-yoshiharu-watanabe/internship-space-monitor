@@ -57,7 +57,7 @@ LEVEL_COLORS = {
 MODEL = Path(__file__).resolve().parent / "models" / "yolox_tiny.onnx"
 FRAME_WIDTH = 640
 # 日本語にすると Jetson（Qt）でウィンドウが開けない。Jetson で2人の画面を見分けるためユーザー名を入れる
-WINDOW = f"Space Monitor {os.environ.get('USER', '')} (q: quit)"
+WINDOW = " ".join(filter(None, ["Space Monitor", os.environ.get("USER"), "(q: quit)"]))
 WINDOW_SIZE = (960, 540)  # 1920x1080 のモニタに2人分並ぶ大きさ
 ALERT_KEYS = {"rule", "level", "message"}
 
@@ -229,11 +229,21 @@ def main():
     cv2.resizeWindow(WINDOW, *WINDOW_SIZE)
     cv2.setMouseCallback(WINDOW, on_mouse)
 
+    print("起動しました。ウィンドウで q キー、またはこのターミナルで Ctrl+C を押すと終了します")
+    try:
+        loop(detector, ids, cap, is_video, video_fps, states, mouse, font, big_font)
+    except KeyboardInterrupt:
+        pass
+    cap.release()
+    cv2.destroyAllWindows()
+    print("終了しました")
+
+
+def loop(detector, ids, cap, is_video, video_fps, states, mouse, font, big_font):
     loop_offset = 0.0   # 動画を巻き戻したとき、時刻が戻らないようにする
     last_video_time = 0.0
     prev = time.time()
     fps = 0.0
-    print("起動しました。q キーで終了します")
 
     while True:
         started = time.time()
@@ -243,7 +253,7 @@ def main():
                 loop_offset += last_video_time
                 cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
                 continue
-            sys.exit("[エラー] カメラから映像が来ません。ケーブルと find_camera.py を確認してください")
+            sys.exit("[エラー] カメラから映像が来ません。ケーブルが抜けていないか確認してください")
 
         if is_video:
             last_video_time = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000
@@ -266,9 +276,6 @@ def main():
         key = cv2.waitKey(wait_ms) & 0xFF
         if key in (ord("q"), 27) or cv2.getWindowProperty(WINDOW, cv2.WND_PROP_VISIBLE) < 1:
             break
-
-    cap.release()
-    cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
