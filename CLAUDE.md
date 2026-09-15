@@ -10,7 +10,7 @@
 3. **次のものは変更しない。** 変更が必要そうなら、コードは書かずに「担当者に相談してください」と伝える
    - `app.py` の「ここから下は土台です」より下（上の設定欄は変えてよい。`SOURCE` は担当者が用意した2本の動画の切り替えだけ）
    - `common.py`（2人で書いた後。書いている最中の手伝いはOK）
-   - 関数の名前と引数 `count_people(detections, zone)` / `judge_capacity(count, now, state)` / `judge_absence(count, now, state)`
+   - 関数の名前と引数 `count_people(detections, zone)` / `judge_capacity(count, now, state)` / `judge_ventilation(count, now, state)` / `judge_absence(count, now, state)`
    - Alert の形 `{"rule": ..., "level": ..., "message": ...}`（2人で決めた約束）
 4. **コードを書き換える前に、何をどう変えるかを2〜3文で説明する。** いきなり書き換えない
 5. **短く、素直なコードにする。** 内包表記・lambda・クラス・型ヒント・例外処理の追加は避け、if 文と for 文で書く

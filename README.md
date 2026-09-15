@@ -1,6 +1,6 @@
 # スペース見守りモニター
 
-カメラに映った人をAIが見つけて、**定員オーバー**と**離席**を画面に知らせるアプリです。
+カメラに映った人をAIが見つけて、**換気のタイミング**と**離席**を画面に知らせるアプリです。
 カメラ・AI・画面表示の部分はできています。みなさんが書くのは、**人数を数える関数**と**自分のルールの関数**です。
 
 開発は **Jetson（エッジAIコンピュータ）の上** で行います。自分の PC の VS Code から Jetson に接続して、コードを書きます。
@@ -57,17 +57,21 @@ Jetson のモニタに **自分のユーザー名が付いたウィンドウ**�
 | ファイル | 担当 | 中身 |
 |---|---|---|
 | `common.py` | **2人で** | `count_people`：ゾーンの中の人数を数える |
-| `capacity.py` | 定員カウント担当 | `judge_capacity`：定員を超えたら警告 |
+| `ventilation.py` | 換気リマインダー担当 | `judge_ventilation`：人がいた時間の合計が一定を超えたら「換気しましょう」 |
 | `absence.py` | 離席検知担当 | `judge_absence`：一定時間いなかったら通知 |
+| `capacity.py` | （練習用） | `judge_capacity`：最初の練習「ゾーンに入ったら警告」で使う |
 | `app.py` | 土台 | **上の「設定」欄だけ**触ってOK（`SOURCE` は用意された2本の動画の切り替えだけ） |
 | `detector.py`・`models/` | 土台 | AIの部分。触らない |
 
 自分のルールを動かすには、`app.py` の `RULES` を自分の担当のものにします。
 
 ```python
-RULES = [judge_capacity]   # 定員カウント担当
-RULES = [judge_absence]    # 離席検知担当
+RULES = [judge_ventilation]   # 換気リマインダー担当
+RULES = [judge_absence]       # 離席検知担当
 ```
+
+※ Jetson で途中から換気リマインダーに取り組む人は、ひな形を `cp /opt/space-monitor/ventilation.py .` でコピーし、
+`app.py` の設定欄の `RULES` の上に `from ventilation import judge_ventilation` を1行足してください。
 
 ## 5. 作業のルール
 

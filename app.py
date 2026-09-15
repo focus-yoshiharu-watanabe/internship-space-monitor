@@ -20,6 +20,7 @@ from detector import COCO_CLASSES, Detector
 from common import count_people
 from capacity import judge_capacity
 from absence import judge_absence
+from ventilation import judge_ventilation
 
 # ============================================================
 # 設定（ここは自由に変えてOK）
@@ -41,8 +42,9 @@ ZONE = (160, 60, 480, 340)
 
 # 動かすルール。自分の担当のものだけ残す。統合するときは両方並べる
 RULES = [judge_capacity]
+# RULES = [judge_ventilation]
 # RULES = [judge_absence]
-# RULES = [judge_capacity, judge_absence]
+# RULES = [judge_ventilation, judge_absence]
 
 # Alert の level ごとの色 (赤, 緑, 青)。2人で決めた約束に合わせて書き換える
 LEVEL_COLORS = {
